@@ -4,7 +4,7 @@
 
 How to download it?
 
-Clone the repository (or download it as a ZIP):
+Clone the repository (or download it as a [ZIP](https://github.com/sgmph/centrala/archive/refs/heads/main.zip):
 ```sh
 	git clone https://github.com/sgmph/centrala.git
 	cd centrala
