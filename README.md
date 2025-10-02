@@ -17,7 +17,7 @@ Data is stored locally in your browser. If you clear your browser's data or cach
 
 The app is built with static HTML and JavaScript, allowing it to function fully offline after the initial load. You can even keep it on a USB drive or in the cloud and open the `index.html` file in any browser. By using the Export function, you can download a file containing your links, which you can then transfer to another browser or computer where this web app is installed.
 
-Currently, there is no cloud synchronisation between devices unless you manually copy or export your JSON backup. Please note that storage space is limited by the browser, typically providing at least 5MB of localStorage.
+Currently, there is no cloud synchronisation between devices unless you manually copy or export your JSON backup. Please note that storage space is limited by the browser.
 
 **Recommendation**
 
