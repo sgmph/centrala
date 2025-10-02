@@ -9,13 +9,13 @@ Clone the repository (or download it as a [ZIP](https://github.com/sgmph/central
 	git clone https://github.com/sgmph/centrala.git
 	cd centrala
 ```
-Open index.html in your browser. That's it.
+Open `index.html` in your browser. That's it.
 
 **Please note**:
 
-Data is stored locally in your browser. If you clear your browser's data or cache, your localStorage will be erased, and you will lose your saved links. To avoid this, please use the Export/Import options. The app utilises the browser's Storage Manager API (navigator.storage.persist()) to request persistent storage. If this request is granted, the browser will attempt to keep your data safe from automatic cleanup.
+Data is stored locally in your browser. If you clear your browser's data or cache, your `localStorage` will be erased, and you will lose your saved links. To avoid this, please use the Export/Import options. The app utilises the browser's Storage Manager API `navigator.storage.persist()` to request persistent storage. If this request is granted, the browser will attempt to keep your data safe from automatic cleanup.
 
-The app is built with static HTML and JavaScript, allowing it to function fully offline after the initial load. You can even keep it on a USB drive or in the cloud and open the "index.html" file in any browser. By using the Export function, you can download a file containing your links, which you can then transfer to another browser or computer where this web app is installed.
+The app is built with static HTML and JavaScript, allowing it to function fully offline after the initial load. You can even keep it on a USB drive or in the cloud and open the `index.html` file in any browser. By using the Export function, you can download a file containing your links, which you can then transfer to another browser or computer where this web app is installed.
 
 Currently, there is no cloud synchronisation between devices unless you manually copy or export your JSON backup. Please note that storage space is limited by the browser, typically providing at least 5MB of localStorage.
 
