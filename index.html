@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#ffffff" />
+<title>Centrala - A Central Hub for Managing Your Links</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect width='32' height='32' fill='black'/></svg>">
+
+<!-- IBM Plex Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root { --ink:#000; --paper:#fff; --thick:2px; }
+
+  /* Smooth theme swap (if user allows motion) */
+  @media (prefers-reduced-motion: no-preference) {
+    html, body { transition: background .2s ease, color .2s ease; }
+  }
+
+  /* Follow system dark mode unless user has explicitly chosen */
+  @media (prefers-color-scheme: dark) {
+    :root { color-scheme: dark; }
+    body:not([data-theme="light"]) {
+      --ink:#fff;
+      --paper:#000;
+    }
+  }
+
+  /* Explicit dark theme (user toggle) */
+  body[data-theme="dark"] {
+    --ink:#fff;
+    --paper:#000;
+    color-scheme: dark;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; font-family:'IBM Plex Sans',sans-serif; color:var(--ink);
+    background:var(--paper); line-height:1.55; letter-spacing:.2px;
+  }
+
+  /* Abstract background grid (light/dark aware via vars) */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:-1;
+    background:
+      repeating-linear-gradient(0deg,rgba(0,0,0,.04) 0 1px,transparent 1px 24px),
+      repeating-linear-gradient(90deg,rgba(0,0,0,.04) 0 1px,transparent 1px 24px);
+  }
+  /* Dark-mode grid tint */
+  body[data-theme="dark"]::before {
+    background:
+      repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 24px),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 24px);
+  }
+  @media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"])::before {
+      background:
+        repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 24px),
+        repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 24px);
+    }
+  }
+
+  .page{ max-width:1100px; margin:40px auto; padding:0 20px 60px; position:relative; }
+
+  /* Header */
+  .header{
+    display:flex; align-items:center; justify-content:space-between;
+    border:var(--thick) solid var(--ink); padding:14px 16px; background:var(--paper);
+  }
+  .brand{ display:inline-flex; align-items:center; gap:12px; }
+  .logo{
+    width:46px; height:46px; border:var(--thick) solid var(--ink);
+    
+    color:var(--ink);
+  }
+  .wordmark{ font-weight:700; font-size:18px; text-transform:uppercase; }
+
+  /* Buttons */
+  .toolbar{ display:flex; gap:8px; flex-wrap:wrap; }
+  .btn{
+    border:var(--thick) solid var(--ink); background:var(--paper); color:var(--ink);
+    padding:10px 12px; font-weight:700; cursor:pointer; text-decoration:none; line-height:1;
+    transition:transform .12s ease, box-shadow .12s ease; box-shadow:4px 4px 0 0 var(--ink);
+    font-family:'IBM Plex Sans',sans-serif; font-size:14px; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn:hover{ transform:translate(-1px,-1px); box-shadow:5px 5px 0 0 var(--ink); }
+  .btn:active{ transform:translate(0,0); box-shadow:2px 2px 0 0 var(--ink); }
+
+  /* Section blocks */
+  .section-box{ border:var(--thick) solid var(--ink); background:var(--paper); margin-top:20px; }
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding:14px 16px; border-bottom:var(--thick) solid var(--ink);
+  }
+  .section-title{ font-size:18px; font-weight:700; }
+
+  /* Categories grid */
+  .categories{
+    display:grid; grid-template-columns:repeat(12,1fr); gap:18px; margin-top:20px;
+  }
+  .category{ grid-column:span 12; border:var(--thick) solid var(--ink); background:var(--paper); }
+  @media (min-width:720px){ .category{ grid-column:span 6; } }
+  @media (min-width:1040px){ .category{ grid-column:span 4; } }
+
+  .category-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding:14px 16px; border-bottom:var(--thick) solid var(--ink);
+  }
+  .category-title{ font-size:18px; font-weight:700; }
+  .category-meta{ font-size:12px; opacity:.7; align-self:center; }
+
+  /* Links */
+  .links{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+    gap:12px; padding:14px;
+  }
+  .link{
+    font-family:'IBM Plex Mono',monospace; text-decoration:none; color:var(--ink);
+    border:var(--thick) solid var(--ink); padding:14px 12px; min-height:66px; font-weight:600;
+    text-align:center; transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+    box-shadow:3px 3px 0 0 var(--ink); display:flex; align-items:center; justify-content:center;
+  }
+  .link:hover{ transform:translate(-1px,-1px); box-shadow:5px 5px 0 0 var(--ink); background:#f7f7f7; }
+  /* Dark mode hover with pastel paper yellow */
+  body[data-theme="dark"] .link:hover {
+    background:#ffffe0;   /* pastel paper yellow */
+    color:#000;           /* keep text readable */
+  }
+  @media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"]) .link:hover {
+      background:#ffffe0;   /* pastel paper yellow */
+      color:#000;           /* keep text readable */
+    }
+  }
+  .link:active{ transform:translate(0,0); box-shadow:2px 2px 0 0 var(--ink); }
+
+  .links button{ font-family:'IBM Plex Mono',monospace; color:var(--ink); }
+  .links button:hover{ opacity:.7; }
+
+  /* Footer */
+  .footer{
+    margin-top:28px; border:var(--thick) solid var(--ink); padding:14px 16px; background:var(--paper);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .small{ font-size:12px; opacity:.7; }
+
+  /* Form & utils */
+  .form-grid{ padding:14px; display:grid; gap:10px; }
+  .visually-hidden{
+    position:absolute!important; clip:rect(1px,1px,1px,1px);
+    padding:0; border:0; height:1px; width:1px; overflow:hidden; white-space:nowrap;
+  }
+  .right{ display:flex; gap:12px; flex-wrap:wrap; justify-content:flex-end; }
+</style>
+</head>
+<body id="top">
+  <div class="page">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <svg class="logo" width="46" height="46" viewBox="0 0 46 46" aria-hidden="true" style="color:#e53935;">
+            <!-- Square border -->
+            <rect x="2" y="2" width="42" height="42" fill="none" stroke="currentColor" stroke-width="2"/>
+            <!-- Red star centered -->
+            <polygon points="23,6 28,18 41,18 30,26 34,38 23,30 12,38 16,26 5,18 18,18" fill="currentColor"/>
+        </svg>
+        <div class="wordmark">Centrala</div>
+      </div>
+      <nav class="toolbar">
+        <a class="btn" href="https://github.com/sgmph" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.26c0 4.51 2.87 8.34 6.84 9.7.5.09.68-.22.68-.48 0-.24-.01-.87-.01-1.7-2.78.62-3.37-1.36-3.37-1.36-.45-1.17-1.1-1.48-1.1-1.48-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.65.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.29.1-2.68 0 0 .84-.28 2.75 1.05a9.36 9.36 0 0 1 2.5-.34c.85 0 1.71.11 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.39.2 2.42.1 2.68.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.07.36.32.68.94.68 1.89 0 1.37-.01 2.47-.01 2.81 0 .27.18.58.69.48A10.01 10.01 0 0 0 22 12.26C22 6.58 17.52 2 12 2z"/>
+          </svg>
+          GitHub
+        </a>
+        <a class="btn" href="https://slobodanfraneta.com" target="_blank" rel="noopener noreferrer" aria-label="Medium">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <g fill="currentColor">
+              <ellipse cx="5.5" cy="12" rx="4.5" ry="7"/>
+              <rect x="11" y="5" width="4" height="14" rx="2"/>
+              <ellipse cx="18.5" cy="12" rx="1.5" ry="7"/>
+            </g>
+          </svg>
+          Medium
+        </a>
+        <!-- Theme toggle -->
+        <button class="btn" id="themeToggle" aria-pressed="false" aria-label="Toggle dark mode">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <!-- Start with moon icon (suggest "switch to dark") -->
+            <path fill="currentColor" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          Dark/Light Mode
+        </button>
+      </nav>
+    </header>
+
+    <!-- Two-row grid: Add Link (left), Tasks (right) -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:32px;">
+        <!-- Add Link (left, 1/2 width) -->
+        <section class="section-box" id="add-link-box" style="margin-top:0;">
+            <div class="section-head">
+                <h2 class="section-title">🔗 Add New Link</h2>
+            </div>
+            <form id="linkForm" class="form-grid" autocomplete="off">
+                <label for="linkName" class="visually-hidden">Link Name</label>
+                <input type="text" id="linkName" placeholder="Link Name" required>
+
+                <label for="linkUrl" class="visually-hidden">URL</label>
+                <input type="url" id="linkUrl" placeholder="https://example.com" required>
+
+                <label for="categorySelect" class="visually-hidden">Category</label>
+                <select id="categorySelect" aria-label="Category">
+                    <option value="new">Create New Category</option>
+                </select>
+
+                <label for="newCategory" class="visually-hidden">New Category Name</label>
+                <input type="text" id="newCategory" placeholder="New Category Name" style="display:none;">
+
+                <button type="submit" class="btn">Save New Link</button>
+            </form>
+        </section>
+
+        <!-- Tasks (right, 1/2 width) -->
+        <section class="section-box" id="tasks-box" style="margin-top:0;">
+            <div class="section-head">
+                <h2 class="section-title">📝 Daily Tasks</h2>
+            </div>
+            <form id="taskForm" class="form-grid" autocomplete="off">
+                <label for="taskInput" class="visually-hidden">New Task</label>
+                <input type="text" id="taskInput" placeholder="Add a new task..." required>
+                <button type="submit" class="btn">Add Task</button>
+            </form>
+            <ul id="taskList" style="list-style:none; padding:14px; margin:0;">
+                <!-- Tasks will appear here -->
+            </ul>
+        </section>
+    </div>
+    <script>
+        // Simple daily tasks logic
+        const taskForm = document.getElementById('taskForm');
+        const taskInput = document.getElementById('taskInput');
+        const taskList = document.getElementById('taskList');
+        const TASKS_KEY = 'centralaTasks';
+
+        function loadTasks() {
+            try {
+                return JSON.parse(localStorage.getItem(TASKS_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+        function saveTasks(tasks) {
+            localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+        }
+        function renderTasks(tasks) {
+            taskList.innerHTML = '';
+            tasks.forEach((task, idx) => {
+                const li = document.createElement('li');
+                li.style.display = 'flex';
+                li.style.alignItems = 'center';
+                li.style.justifyContent = 'space-between';
+                li.style.padding = '6px 0';
+                li.innerHTML = `
+                    <span style="flex:1;${task.done?'text-decoration:line-through;opacity:.6;':''}">${task.text}</span>
+                    <div style="display:flex;gap:8px;">
+                        <button type="button" aria-label="Done" style="border:none;background:transparent;cursor:pointer;font-size:16px;" data-done="${idx}">${task.done?'⬛':'🔲'}</button>
+                        <button type="button" aria-label="Delete" style="border:none;background:transparent;cursor:pointer;font-size:16px;" data-del="${idx}">✖</button>
+                    </div>
+                `;
+                taskList.appendChild(li);
+            });
+        }
+        let tasks = loadTasks();
+        renderTasks(tasks);
+
+        taskForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const text = taskInput.value.trim();
+            if (!text) return;
+            tasks.push({ text, done: false });
+            saveTasks(tasks);
+            renderTasks(tasks);
+            taskForm.reset();
+            taskInput.focus();
+        });
+        taskList.addEventListener('click', e => {
+            const doneIdx = e.target.getAttribute('data-done');
+            const delIdx = e.target.getAttribute('data-del');
+            if (doneIdx !== null) {
+                tasks[doneIdx].done = !tasks[doneIdx].done;
+                saveTasks(tasks);
+                renderTasks(tasks);
+            }
+            if (delIdx !== null) {
+                tasks.splice(delIdx, 1);
+                saveTasks(tasks);
+                renderTasks(tasks);
+            }
+        });
+    </script>
+
+<!-- Filters -->
+<section class="section-box" id="filters-box" style="padding-bottom:18px;">
+  <div class="section-head">
+    <h2 class="section-title">🗂️ Filter Categories</h2>
+  </div>
+  <div id="categoryFilters" style="
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    padding: 14px;
+    box-sizing: border-box;
+  "></div>
+</section>
+<script>
+  // Multi-select category filter logic
+  const categoryFilters = document.getElementById('categoryFilters');
+  let selectedCategories = [];
+
+  function updateCategoryFilters(categories) {
+    categoryFilters.innerHTML = '';
+    categories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.type = 'button';
+      btn.textContent = cat;
+      btn.setAttribute('data-cat', cat);
+      btn.setAttribute('aria-pressed', 'false');
+      btn.style.fontSize = '13px';
+      btn.style.width = '100%';
+      btn.addEventListener('click', () => {
+        if (selectedCategories.includes(cat)) {
+          selectedCategories = selectedCategories.filter(c => c !== cat);
+          btn.setAttribute('aria-pressed', 'false');
+        } else {
+          selectedCategories.push(cat);
+          btn.setAttribute('aria-pressed', 'true');
+        }
+        filterCategories();
+      });
+      categoryFilters.appendChild(btn);
+    });
+    // "Show All" button
+    const allBtn = document.createElement('button');
+    allBtn.className = 'btn';
+    allBtn.type = 'button';
+    allBtn.textContent = 'Show All';
+    allBtn.style.fontSize = '13px';
+    allBtn.style.gridColumn = 'span 6';
+    allBtn.style.width = '100%';
+    allBtn.addEventListener('click', () => {
+      selectedCategories = [];
+      Array.from(categoryFilters.children).forEach(b => b.setAttribute('aria-pressed', 'false'));
+      filterCategories();
+    });
+    categoryFilters.appendChild(allBtn);
+  }
+
+  function filterCategories() {
+    const categoryEls = document.querySelectorAll('.category');
+    if (selectedCategories.length === 0) {
+      categoryEls.forEach(el => el.style.display = '');
+    } else {
+      categoryEls.forEach(el => {
+        const title = el.querySelector('.category-title')?.textContent;
+        el.style.display = selectedCategories.includes(title) ? '' : 'none';
+      });
+    }
+  }
+
+  // Hook into category rendering
+  function getCategoryTitles() {
+    return Array.from(document.querySelectorAll('.category-title')).map(el => el.textContent);
+  }
+  function refreshFilters() {
+    updateCategoryFilters(getCategoryTitles());
+    filterCategories();
+  }
+  window.addEventListener('load', refreshFilters);
+
+  // Re-populate filters whenever categories change
+  const observer = new MutationObserver(refreshFilters);
+  observer.observe(document.querySelector('.categories'), { childList: true, subtree: true });
+</script>
+<!-- End Filters -->
+
+<!-- Categories (rendered by JS) -->
+<section class="categories"></section>
+
+<!-- Backup -->
+<section class="section-box">
+  <div class="section-head">
+    <h2 class="section-title">Backup</h2>
+    <div class="right">
+      <button class="btn" id="exportBtn">Export Links</button>
+      <button class="btn" id="importBtn">Import Links</button>
+      <button class="btn" id="resetBtn" title="Clear all data (dev/test)">Reset Data</button>
+      <input type="file" id="importFile" accept="application/json" class="visually-hidden">
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <span class="small">© 2025 — The easiest way to organise your links and workflow in one place. | Ver. 1.0.0</span>
+  <div class="toolbar">
+    <a class="btn" href="https://github.com/sgmph" target="_blank" rel="noopener noreferrer">Help</a>
+    <a class="btn" href="#top" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;">Back to Top</a>
+  </div>
+</footer>
+</div>
+
+<script>
+(() => {
+  const STORAGE_KEY = 'linkOrganizerDataV1';
+  const THEME_KEY   = 'linkOrganizerTheme';
+
+  const categoriesEl = document.querySelector('.categories');
+  const form        = document.getElementById('linkForm');
+  const catSelect   = document.getElementById('categorySelect');
+  const newCatInput = document.getElementById('newCategory');
+  const exportBtn   = document.getElementById('exportBtn');
+  const importBtn   = document.getElementById('importBtn');
+  const importFile  = document.getElementById('importFile');
+  const resetBtn    = document.getElementById('resetBtn');
+  const themeToggle = document.getElementById('themeToggle');
+
+  // ---------- Theme ----------
+  function setThemeIcon(isDark){
+    // when dark: show sun (suggest switching to light)
+    // when light: show moon (suggest switching to dark)
+    const path = themeToggle?.querySelector('svg path');
+    if (!path) return;
+    if (isDark){
+      // sun-ish simple glyph
+      path.setAttribute('d','M12 4a8 8 0 1 0 8 8c0-.34-.02-.67-.07-1A6 6 0 0 1 12 4z');
+    } else {
+      // moon
+      path.setAttribute('d','M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z');
+    }
+  }
+
+  function applyTheme(theme){
+    if (theme === 'dark'){
+      document.body.setAttribute('data-theme','dark');
+      themeToggle?.setAttribute('aria-pressed','true');
+      setThemeIcon(true);
+    } else if (theme === 'light'){
+      document.body.setAttribute('data-theme','light');
+      themeToggle?.setAttribute('aria-pressed','false');
+      setThemeIcon(false);
+    } else {
+      document.body.removeAttribute('data-theme'); // follow system
+      const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+      themeToggle?.setAttribute('aria-pressed', prefersDark ? 'true' : 'false');
+      setThemeIcon(prefersDark);
+    }
+  }
+
+  (function initTheme(){
+    const saved = localStorage.getItem(THEME_KEY); // 'dark' | 'light' | null
+    applyTheme(saved);
+  })();
+
+  themeToggle?.addEventListener('click', () => {
+    const current = document.body.getAttribute('data-theme'); // 'dark'|'light'|null
+    const next = current === 'dark' ? 'light' : current === 'light' ? null : 'dark';
+    if (next) localStorage.setItem(THEME_KEY,next); else localStorage.removeItem(THEME_KEY);
+    applyTheme(next);
+  });
+
+  window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', () => {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (!saved) applyTheme(null); // follow system again
+  });
+
+  // ---------- Helpers ----------
+  function normalizeUrl(u){
+    const v = (u.startsWith('http://') || u.startsWith('https://')) ? u : 'https://' + u;
+    try { new URL(v); return v; } catch { return null; }
+  }
+  const DEFAULT_STATE = { categories: {} };
+  function loadState(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT_STATE; } catch { return DEFAULT_STATE; } }
+  function saveState(state){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  async function requestPersistentStorage(){ if(navigator.storage?.persist){ try{ await navigator.storage.persist(); }catch{} } }
+
+  // ---------- UI helpers ----------
+  function updateNewCategoryField(){
+    const onlyNew = catSelect.options.length===1 && catSelect.options[0].value==='new';
+    if (onlyNew) catSelect.value='new';
+    const show = catSelect.value==='new';
+    newCatInput.style.display = show ? 'block' : 'none';
+    newCatInput.required = show;
+    if (!show) newCatInput.value='';
+  }
+
+  function syncSelect(state){
+    while (catSelect.firstChild) catSelect.removeChild(catSelect.firstChild);
+    Object.entries(state.categories)
+      .sort((a,b)=>a[1].title.localeCompare(b[1].title))
+      .forEach(([key,cat])=>{
+        const opt=document.createElement('option');
+        opt.value=key; opt.textContent=cat.title; catSelect.appendChild(opt);
+      });
+    const optNew=document.createElement('option');
+    optNew.value='new'; optNew.textContent='Create New Category';
+    catSelect.appendChild(optNew);
+    if (Object.keys(state.categories).length===0) catSelect.value='new';
+    updateNewCategoryField();
+  }
+
+  function renderAll(state){
+    const container = document.createDocumentFragment();
+    categoriesEl.innerHTML='';
+    Object.entries(state.categories)
+      .sort((a,b)=>a[1].title.localeCompare(b[1].title))
+      .forEach(([key,cat])=>{
+        if (!cat.links.length) return;
+        const article=document.createElement('article');
+        article.className='category';
+        article.id=key;
+        article.innerHTML=`
+          <div class="category-head">
+            <h2 class="category-title">${cat.title}</h2>
+            <span class="category-meta">${cat.links.length} link${cat.links.length!==1?'s':''}</span>
+          </div>
+          <div class="links"></div>
+        `;
+        const linksDiv=article.querySelector('.links');
+        [...cat.links].sort((a,b)=>a.name.localeCompare(b.name)).forEach((link,idx)=>{
+          const wrap=document.createElement('div');
+          wrap.style.position='relative';
+          const a=document.createElement('a');
+          a.className='link'; a.href=link.url; a.target='_blank'; a.rel='noopener'; a.textContent=link.name;
+          const del=document.createElement('button');
+          del.textContent='✖'; del.type='button';
+          del.setAttribute('data-del','1');
+          del.setAttribute('data-cat',key);
+          del.setAttribute('data-idx',idx);
+          del.setAttribute('aria-label',`Delete ${link.name}`);
+          Object.assign(del.style,{position:'absolute',top:'4px',right:'4px',border:'none',background:'transparent',cursor:'pointer',fontSize:'14px',lineHeight:'1',padding:'2px 4px'});
+          wrap.appendChild(a); wrap.appendChild(del); linksDiv.appendChild(wrap);
+        });
+        container.appendChild(article);
+      });
+    categoriesEl.appendChild(container);
+    syncSelect(state);
+  }
+
+  // ---------- Init ----------
+  let state = loadState();
+  renderAll(state);
+  requestPersistentStorage();
+
+  // ---------- Events ----------
+  catSelect.addEventListener('change', updateNewCategoryField);
+
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const name = document.getElementById('linkName').value.trim();
+    let url = normalizeUrl(document.getElementById('linkUrl').value.trim());
+    if (!url){ alert('Please enter a valid URL.'); return; }
+    let catKey = catSelect.value;
+    if (catKey==='new'){
+      catKey = newCatInput.value.trim();
+      if (!catKey){ newCatInput.focus(); return; }
+    }
+    if (!name || !catKey) return;
+
+    const key = catKey.toLowerCase();
+    const title = catKey;
+    if (!state.categories[key]) state.categories[key] = { title, links: [] };
+
+    const exists = state.categories[key].links.some(l => l.url===url || l.name.toLowerCase()===name.toLowerCase());
+    if (exists){ alert('This link already exists in that category.'); return; }
+
+    state.categories[key].links.push({ name, url });
+    saveState(state);
+    renderAll(state);
+    form.reset();
+    updateNewCategoryField();
+    document.getElementById('linkName').focus();
+  });
+
+  categoriesEl.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-del]');
+    if (!btn) return;
+    const cat = btn.getAttribute('data-cat');
+    const idx = parseInt(btn.getAttribute('data-idx'),10);
+    if (!state.categories[cat] || Number.isNaN(idx)) return;
+    state.categories[cat].links.splice(idx,1);
+    if (state.categories[cat].links.length===0) delete state.categories[cat];
+    saveState(state);
+    renderAll(state);
+  });
+
+  // ---------- Backup ----------
+  exportBtn?.addEventListener('click', ()=>{
+    const json = localStorage.getItem(STORAGE_KEY) ?? '{"categories":{}}';
+    const blob = new Blob([json], { type:'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href=url; a.download=`links-backup-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  // Trigger hidden file input
+  importBtn?.addEventListener('click', ()=> importFile.click());
+
+  importFile?.addEventListener('change', async (e)=>{
+    const file = e.target.files?.[0]; if (!file) return;
+    if (file.size > 2*1024*1024){ alert('File too large (>2MB).'); e.target.value=''; return; }
+    const text = await file.text();
+    let newState;
+    try{
+      newState = JSON.parse(text);
+      if (!newState || typeof newState!=='object' || !newState.categories || typeof newState.categories!=='object'){
+        throw new Error('Bad shape');
+      }
+    }catch{
+      alert('Invalid JSON file.');
+      e.target.value=''; return;
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+    state = newState;
+    renderAll(state);
+    e.target.value='';
+  });
+
+  resetBtn?.addEventListener('click', ()=>{
+    if (!confirm('Clear all categories and links?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state = { categories:{} };
+    renderAll(state);
+  });
+
+})();
+</script>
+</body>
+</html>
