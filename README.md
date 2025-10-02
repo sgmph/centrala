@@ -1,6 +1,6 @@
 **Centrala** is a minimalist web app designed to organise essential links, tools, and resources into categorised sections. I developed this app for my personal use because I enjoy having all my links in one place for quicker navigation. It might also be helpful to others, so feel free to use it.
 
-![Centrala Dashboard](https://i.postimg.cc/1mKS6KhT/sgmph-links-dashboard.png)
+![Centrala Dashboard](https://raw.githubusercontent.com/sgmph/centrala/refs/heads/main/resources/img/sgmph-links-dashboard.png)
 
 How to download it?
 
@@ -27,6 +27,6 @@ If you enjoy keeping all your links organised in one central location, consider 
 2. Access the settings by clicking on the hamburger menu in the top right corner, or type `about:preferences#home` in the address bar.
 3. In the "Homepage and new windows" section, select "Custom URLs" and enter the path to the `index.html` file where you stored it.
 
-![https://i.postimg.cc/npByQkKt/add-as-homepage.png](https://i.postimg.cc/npByQkKt/add-as-homepage.png)
+![Add as Homepage in Mozilla Firefox](https://raw.githubusercontent.com/sgmph/centrala/refs/heads/main/resources/img/add-as-homepage.png)
 
 Now, whenever you open Firefox or a new window, this web app will load as your default page.
