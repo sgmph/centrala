@@ -1,4 +1,4 @@
-**Centrala** is a minimalist local web app designed to organise essential links, tools, and resources into categorised sections. I developed this app for my personal use because I enjoy having all my links in one place for quicker navigation. It might also be helpful to others, so feel free to use it.
+**Centrala** is a minimalist and lightweight local web app designed to organise essential links, tools, and resources into categorised sections. I developed this app for my personal use because I enjoy having all my links in one place for quicker navigation. It might also be helpful to others, so feel free to use it.
 
 ![Centrala Dashboard](https://raw.githubusercontent.com/sgmph/centrala/refs/heads/main/resources/img/sgmph-links-dashboard.png)
 
